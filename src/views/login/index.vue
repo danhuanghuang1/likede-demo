@@ -53,6 +53,12 @@
 </template>
 
 <script>
+// 环境变量的作用
+// 1,正常公司中有几个环境 4 开发dev 测试test 预发uat 线上pro
+// 在项目里如何配置这个环境通过，env配置base api
+// 这个文档中
+// 开发环境的接口前缀/api
+// 线上环境的接口前缀/prod-api
 import { validUsername } from '@/utils/validate'
 
 export default {
