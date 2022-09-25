@@ -1,24 +1,17 @@
 import request from '@/utils/request'
 
+// 更改验证码图片
+export function changeCodeNum(clientToken) {
+  return request({
+    url: `/user-service/user/imageCode/${clientToken}`,
+    responseType: 'blob'
+  })
+}
+// 登录
 export function login(data) {
   return request({
-    url: '/vue-admin-template/user/login',
-    method: 'post',
+    url: '/user-service/user/login',
+    method: 'POST',
     data
-  })
-}
-
-export function getInfo(token) {
-  return request({
-    url: '/vue-admin-template/user/info',
-    method: 'get',
-    params: { token }
-  })
-}
-
-export function logout() {
-  return request({
-    url: '/vue-admin-template/user/logout',
-    method: 'post'
   })
 }

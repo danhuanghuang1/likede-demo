@@ -18,3 +18,6 @@ export function validUsername(str) {
   const valid_map = ['admin', 'editor']
   return valid_map.indexOf(str.trim()) >= 0
 }
+export function validPhone(str) {
+  return /^[a-zA-Z0-9_-]{4,16}$/.test(str.trim())
+}
