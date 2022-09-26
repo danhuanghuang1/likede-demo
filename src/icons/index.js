@@ -11,4 +11,3 @@ const req = require.context('./svg', false, /\.svg$/)
 // console.log(req('./dashboard.svg'));
 const requireAll = requireContext => requireContext.keys().map(requireContext)
 requireAll(req)
-console.log(requireAll(req))

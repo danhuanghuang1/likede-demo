@@ -35,8 +35,19 @@ module.exports = {
     overlay: {
       warnings: false,
       errors: true
-    }
+    },
     // before: require('./mock/mock-server.js')
+    // 开发环境跨域设置
+    // 同源问题是浏览器提供的安全功能，
+    // 并且不同的浏览器不知道向那一台服务器发起请求，
+    // 解决办法，跨过浏览器，让代理服务器向服务器发起请求就不会有同源策略，分发请求
+    proxy: {
+      '/api': {
+        // 代理服务器地址
+        target: 'http://42.192.129.12:3001/',
+        changeOrigin: true
+      }
+    }
   },
   configureWebpack: {
     // provide the app's title in webpack's name field, so that
