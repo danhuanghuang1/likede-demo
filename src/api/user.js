@@ -15,3 +15,9 @@ export function login(data) {
     data
   })
 }
+// 获取用户的信息
+export function getuserInfo(id) {
+  return request({
+    url: `/user-service/user/${id}`
+  })
+}

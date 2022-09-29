@@ -109,6 +109,7 @@ export default {
   },
   created() {
     this.changeCode()
+    this.$store.dispatch('user/getUserInfo')
   },
 
   methods: {
@@ -144,23 +145,23 @@ export default {
       try {
         await this.$refs.loginForm.validate()
 
-        await this.$store.dispatch('user/loginAction', {
+        const res = await this.$store.dispatch('user/loginAction', {
           loginName: this.loginForm.username,
           password: this.loginForm.password,
           code: this.loginForm.verify,
           clientToken: this.randomNum,
           loginType: 0
         })
-        if (this.$store.state.user.data.msg === '登录成功') {
+        if (res.data.msg === '登录成功') {
           this.$router.push('/dashboard')
-        } else if (this.$store.state.user.data.msg === '验证码错误') {
+        } else if (res.data.msg === '验证码错误') {
           this.$message({
-            type: 'warning',
+            type: 'error',
             message: '验证码错误!'
           })
-        } else if (this.$store.state.user.data.msg === '账户名或密码错误') {
+        } else if (res.data.msg === '账户名或密码错误') {
           this.$message({
-            type: 'warning',
+            type: 'error',
             message: '账户名或密码错误!'
           })
         }
