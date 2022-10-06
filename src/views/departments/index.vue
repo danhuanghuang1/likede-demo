@@ -1,9 +1,9 @@
 <template>
   <div class="departments-container">
     <el-card>
-      <treenode :tree-node="title" :is-root="false" />
+      <treenode :tree-node="title" :is-root="false" @addDept="handleAddDept" />
     </el-card>
-    <el-tree :data="departs">
+    <el-tree :data="departs" :default-expand-all="true">
       <!-- slot-scope="{ data }"当前节点的数据 -->
       <treenode
         slot-scope="{ data }"
@@ -54,7 +54,11 @@ export default {
       // 调用人员列表
       const result = await getDepartments()
       // 公司设置
-      this.title = { name: result.companyName, manager: result.companyManage }
+      this.title = {
+        name: result.companyName,
+        manager: result.companyManage,
+        id: ''
+      }
       // this.departs = result.depts
       // 以及人员
       this.departs = tranListToTreeData(result.depts, '')

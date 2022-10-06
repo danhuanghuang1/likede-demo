@@ -28,8 +28,14 @@
           v-model="formData.manager"
           style="width: 80%"
           placeholder="请选择"
+          @focus="getEmployeeSimple"
         >
-          <el-option label="username11" value="username" />
+          <el-option
+            v-for="item in employee"
+            :key="item.id"
+            :label="item.username"
+            :value="item.username"
+          />
         </el-select>
       </el-form-item>
       <el-form-item label="部门介绍" prop="introduce">
@@ -46,7 +52,12 @@
     <el-row slot="footer" type="flex" justify="center">
       <!-- 列被分为24 -->
       <el-col :span="6">
-        <el-button type="primary" size="small">确定</el-button>
+        <el-button
+          v-loading="loading"
+          type="primary"
+          size="small"
+          @click="submit"
+        >确定</el-button>
         <el-button size="small" @click="handleClose">取消</el-button>
       </el-col>
     </el-row>
@@ -55,6 +66,7 @@
 
 <script>
 import { getDepartments } from '@/api/departments'
+import { getEmployeeSimple, addDepartments } from '@/api/employess'
 export default {
   name: 'HrsaasAddDept',
   // 通过属性控制组件显隐
@@ -126,7 +138,9 @@ export default {
             trigger: 'blur'
           }
         ]
-      }
+      },
+      employee: [],
+      loading: false
     }
   },
   //   部门名称（name）：必填 1-50个字符 / 同级部门中禁止出现重复部门
@@ -138,7 +152,41 @@ export default {
     // 点击取消按钮，将false传回
     handleClose() {
       this.$emit('update:dialogVisible', false)
+      // 清空校验
       this.$refs.addDeptForm.resetFields()
+      this.formData = {
+        name: '', // 部门名称
+        code: '', // 部门编码
+        manager: '', // 部门管理者
+        introduce: '' // 部门介绍
+      }
+    },
+    async getEmployeeSimple() {
+      // 获得部门列表
+      const res = await getEmployeeSimple()
+      this.employee = res
+    },
+
+    async submit() {
+      try {
+        // 表单校验通过后调用接口
+        // 因为是添加子部门，所以我们需要将新增的部门pid设置成当前部门的id,新增的部门就成了自己的子部门
+
+        await this.$refs.addDeptForm.validate()
+        // 确定按钮的Loading状态
+        this.loading = true
+        await addDepartments({ ...this.formData, pid: this.current.id })
+        // 接口新增成功之后消息提示成功
+        this.$message.success('新增成功')
+        // 刷新父组件的组织架构列表
+        this.$parent.getDepartmentsApi()
+        // 关闭弹窗
+        this.handleClose()
+      } catch (error) {
+        console.log(error)
+      } finally {
+        this.loading = false
+      }
     }
   }
 }

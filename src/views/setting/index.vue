@@ -206,7 +206,6 @@ export default {
     // 获取公司信息
     async getCompanyInfoApi() {
       this.getCompanyList = await getCompanyInfo()
-      console.log(this.getCompanyList)
     }
   }
 }
