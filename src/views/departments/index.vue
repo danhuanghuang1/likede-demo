@@ -1,5 +1,5 @@
 <template>
-  <div class="departments-container">
+  <div v-loading="loading" class="departments-container">
     <el-card>
       <treenode :tree-node="title" :is-root="false" @addDept="handleAddDept" />
     </el-card>
@@ -9,10 +9,16 @@
         slot-scope="{ data }"
         :tree-node="data"
         @addDept="handleAddDept"
+        @editDept="handleEditDept"
+        @replyList="getDepartmentsApi"
       /></el-tree>
     <!-- 再通过addDept弹窗，将控制开关的布尔值传到弹窗 -->
     <!-- current当前项的数据传到add组件里面 -->
-    <addDept :dialog-visible.sync="dialogVisible" :current="current" />
+    <addDept
+      ref="addDept"
+      :dialog-visible.sync="dialogVisible"
+      :current="current"
+    />
   </div>
 </template>
 
@@ -41,7 +47,8 @@ export default {
       nodeList: [],
       title: { name: '江苏传智播客教育科技股份有限公司', manager: '负责人' },
       dialogVisible: false,
-      current: {}
+      current: {},
+      loading: false
     }
   },
 
@@ -51,17 +58,24 @@ export default {
   },
   methods: {
     async getDepartmentsApi() {
-      // 调用人员列表
-      const result = await getDepartments()
-      // 公司设置
-      this.title = {
-        name: result.companyName,
-        manager: result.companyManage,
-        id: ''
+      try {
+        this.loading = true
+        // 调用人员列表
+        const result = await getDepartments()
+        // 公司设置
+        this.departs = tranListToTreeData(result.depts, '')
+        this.title = {
+          name: result.companyName,
+          manager: result.companyManage,
+          id: ''
+        }
+        // this.departs = result.depts
+        // 以及人员
+      } catch (error) {
+        console.log(error)
+      } finally {
+        this.loading = false
       }
-      // this.departs = result.depts
-      // 以及人员
-      this.departs = tranListToTreeData(result.depts, '')
     },
     // 子组件触发事件，弹窗为true
     handleAddDept(treenode) {
@@ -69,6 +83,13 @@ export default {
       // 接受treenode子组件的数据存下来，想要传给adddept组件
       this.current = treenode
       // console.log(treenode)
+    },
+    // 编辑部门
+    handleEditDept(treenode) {
+      this.dialogVisible = true
+      this.current = { ...treenode }
+      // 回显数据
+      this.$refs.addDept.formData = { ...treenode }
     }
   }
 }

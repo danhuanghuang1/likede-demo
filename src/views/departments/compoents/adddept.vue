@@ -1,6 +1,6 @@
 <template>
   <!-- 新增部门的弹层 -->
-  <el-dialog title="新增部门" :visible="dialogVisible">
+  <el-dialog :title="title" :visible="dialogVisible">
     <!-- 表单组件  el-form   label-width设置label的宽度   -->
     <!-- 匿名插槽 -->
     <el-form
@@ -66,7 +66,11 @@
 
 <script>
 import { getDepartments } from '@/api/departments'
-import { getEmployeeSimple, addDepartments } from '@/api/employess'
+import {
+  getEmployeeSimple,
+  addDepartments,
+  updateDepartments
+} from '@/api/employess'
 export default {
   name: 'HrsaasAddDept',
   // 通过属性控制组件显隐
@@ -92,7 +96,22 @@ export default {
       // 调用接口，获取已有的角色列表
       const { depts } = await getDepartments()
       //   判断编码里面有没有重复的 重复返回true
-      const isRepeat = depts.some((ele) => ele.code === value)
+      let isRepeat = true
+      // 编辑模式下，让我自己和自己较验了？？
+      // 解决方案
+      // 对比的过程中把自己排除掉
+      // 然后再去对比
+      if (this.formData.id) {
+        // 编辑模式,要排除自己的id,所有的id,和当前项的id不相等
+        // 如果当前项的id和所有的id相等,没有更改,不需要继续校验,
+        // 如果不相等，说明更改了，需要参加校验
+        isRepeat = depts.some(
+          (ele) => ele.id !== this.formData.id && ele.code === value
+        )
+      } else {
+        // 新增
+        isRepeat = depts.some((ele) => ele.code === value)
+      }
       //   有报错提示，反则
       isRepeat ? callback(new Error(`模块已经存在${value}编码`)) : callback()
     }
@@ -102,13 +121,24 @@ export default {
     // 先从tree拿到数据在把数据送到父组件
     // 父组件在把数据给addDept
     const nameCheck = async(rule, value, callback) => {
-      // 调用接口，获取已有的角色列表
       const { depts } = await getDepartments()
+      let deptstj = true
       //   判断编码里面有没有重复的 重复返回true
-      const deptstj = depts.filter((item) => item.pid === this.current.id)
+      if (this.formData.id) {
+        // 找到当前项的同级部门
+        const deptstj1 = depts.filter(
+          (item) => item.pid === this.current.pid && item.id !== this.current.id
+        )
+        deptstj = deptstj1.some((ele) => ele.name === value)
+        console.log(deptstj1)
+      } else {
+        deptstj = depts
+          .filter((item) => item.pid === this.current.id)
+          .some((ele) => ele.name === value)
+      }
       //   有报错提示，反则
       console.log(deptstj)
-      callback()
+      deptstj ? callback(new Error(`模块已经存在${value}编码`)) : callback()
     }
     return {
       formData: {
@@ -143,17 +173,22 @@ export default {
       loading: false
     }
   },
+  computed: {
+    title() {
+      return this.formData.id ? '编辑部门' : '新增部门'
+    }
+  },
   //   部门名称（name）：必填 1-50个字符 / 同级部门中禁止出现重复部门
   // 部门编码（code）：必填 1-50个字符 / 部门编码在整个模块中都不允许重复
   // 部门负责人（manager）：必填
   // 部门介绍 ( introduce)：必填 1-300个字符
-
   methods: {
     // 点击取消按钮，将false传回
     handleClose() {
       this.$emit('update:dialogVisible', false)
       // 清空校验
       this.$refs.addDeptForm.resetFields()
+      // 点击编辑过后formData会存留id，再点击新增的时候还会显示编辑
       this.formData = {
         name: '', // 部门名称
         code: '', // 部门编码
@@ -171,13 +206,16 @@ export default {
       try {
         // 表单校验通过后调用接口
         // 因为是添加子部门，所以我们需要将新增的部门pid设置成当前部门的id,新增的部门就成了自己的子部门
-
         await this.$refs.addDeptForm.validate()
         // 确定按钮的Loading状态
         this.loading = true
-        await addDepartments({ ...this.formData, pid: this.current.id })
+        if (this.formData.id) {
+          await updateDepartments(this.formData)
+        } else {
+          await addDepartments({ ...this.formData, pid: this.current.id })
+        }
         // 接口新增成功之后消息提示成功
-        this.$message.success('新增成功')
+        this.$message.success(`${this.formData.id ? '编辑' : '新增'}成功`)
         // 刷新父组件的组织架构列表
         this.$parent.getDepartmentsApi()
         // 关闭弹窗

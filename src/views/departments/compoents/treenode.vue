@@ -34,6 +34,7 @@
 </template>
 
 <script>
+import { delDepartments } from '@/api/employess'
 export default {
   props: {
     treeNode: {
@@ -56,9 +57,19 @@ export default {
         // 点击触发父组件事件，弹窗弹开,并将当前想的数据传给父组件
         this.$emit('addDept', this.treeNode)
       } else if (type === 'edit') {
-        console.log('edit')
+        this.$emit('editDept', this.treeNode)
       } else {
-        console.log('del')
+        // 实现删除逻辑
+        // 二次确认
+        this.$confirm('是否确认删除该部门', '提示', { type: 'warning' })
+          .then((res) => {
+            return delDepartments(this.treeNode.id)
+            // 调用删除接口
+          })
+          .then((res) => {
+            this.$message.success('删除成功')
+            this.$emit('replyList')
+          })
       }
     }
   }
