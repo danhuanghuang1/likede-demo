@@ -14,11 +14,16 @@ import router from './router'
 
 import '@/icons' // icon
 import '@/permission' // permission control
+// 注册公共组件
+import plugins from './components/index'
+Vue.use(plugins)
 
-import * as directives from './directives'
-Object.keys(directives).forEach((item) => Vue.directive(item, directives[item]))
-// import { imgerror } from './directives'
 // 定义全局自定义指令
+// import * as directives from './directives'
+// Object.keys(directives).forEach((item) => Vue.directive(item, directives[item]))
+
+// import { imgerror } from './directives'
+
 // Vue.directive('imgerror', imgerror)
 /**
  * If you don't want to use mock-server
