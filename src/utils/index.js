@@ -116,7 +116,7 @@ export function param2Obj(url) {
   return obj
 }
 
-// 筛选一级架构人员
+// 筛选每级架构人员
 export const tranListToTreeData = (list, rootVale) => {
   const arr = []
   list.forEach(item => {

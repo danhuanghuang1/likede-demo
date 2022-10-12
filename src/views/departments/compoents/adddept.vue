@@ -130,14 +130,12 @@ export default {
           (item) => item.pid === this.current.pid && item.id !== this.current.id
         )
         deptstj = deptstj1.some((ele) => ele.name === value)
-        console.log(deptstj1)
       } else {
         deptstj = depts
           .filter((item) => item.pid === this.current.id)
           .some((ele) => ele.name === value)
       }
       //   有报错提示，反则
-      console.log(deptstj)
       deptstj ? callback(new Error(`模块已经存在${value}编码`)) : callback()
     }
     return {

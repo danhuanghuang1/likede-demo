@@ -1,7 +1,7 @@
 // import PageTolls from '@/components/PageTolls/PageTolls.vue'
 // const components = [PageTolls]
 import * as directives from '@/directives'
-
+import * as filter from '@/filters'
 // 实现组件的动态注册
 // require.context()查找路径，参数：路径，是否查找子目录，正则（查找的路径要求）
 // console.log(fn.keys()) // 路径
@@ -18,8 +18,15 @@ const components = fn.keys().map(ele => {
 export default (Vue) => {
   components.forEach(ele => {
     // vue.component('组件名字'，'组件对象')
+    // 全局组件
     Vue.component(ele.default.name, ele.default)
+    // 自定义指令
     Object.keys(directives).forEach((item) => Vue.directive(item, directives[item]))
+    // 全局过滤器
+    Object.keys(filter).forEach(key => {
+      // 注册过滤器。 Vue.filter(过滤器名称, 过滤器方法)
+      Vue.filter(key, filter[key])
+    })
   })
 }
 
