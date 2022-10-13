@@ -46,7 +46,11 @@
         </el-table-column>
         <el-table-column label="操作" fixed="right" width="280">
           <template slot-scope="{ row }">
-            <el-button type="text" size="small">查看</el-button>
+            <el-button
+              type="text"
+              size="small"
+              @click="view(row)"
+            >查看</el-button>
             <el-button type="text" size="small">转正</el-button>
             <el-button type="text" size="small">调岗</el-button>
             <el-button type="text" size="small">离职</el-button>
@@ -124,13 +128,18 @@ export default {
     },
     // 删除功能
     async del(id) {
-      await this.$confirm('确认删除给员工吗', '提示', {
-        type: 'warning'
-      })
-      // 调用删除接口
-      await delEmployee(id)
-      // 渲染页面
-      this.getEmployeeListApi()
+      try {
+        await this.$confirm('确认删除给员工吗', '提示', {
+          type: 'warning'
+        })
+        // 调用删除接口
+        await delEmployee(id)
+        this.$message.success('删除成功')
+        // 渲染页面
+        this.getEmployeeListApi()
+      } catch (error) {
+        this.$message.error('删除失败')
+      }
     },
     // 导出excel
     async exportExcel() {
@@ -172,6 +181,10 @@ export default {
         autoWidth: true, // 非必填
         bookType: 'xlsx' // 非必填
       })
+    },
+    // 点击查看，跳转路由
+    view(row) {
+      this.$router.push('/employees/detail/' + row.id)
     }
   }
 }
