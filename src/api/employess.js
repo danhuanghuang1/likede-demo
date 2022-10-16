@@ -106,7 +106,7 @@ export function getPersonalDetail(id) {
   })
 }
 /** *
- *  读取用户详情的基础信息
+ *  保存用户详情的基础信息
  * **/
 export function updatePersonal(data) {
   return request({

@@ -26,6 +26,16 @@
     <el-card>
       <el-table v-loading="loading" :data="list">
         <el-table-column label="序号" sortable="" width="80" type="index" />
+        <el-table-column label="头像" prop="username">
+          <template slot-scope="{ row }">
+            <img
+              :src="row.staffPhoto"
+              alt=""
+              style="width: 80px; height: 80px"
+              @click="showPic(row)"
+            >
+          </template>
+        </el-table-column>
         <el-table-column label="姓名" prop="username" />
         <el-table-column label="工号" prop="workNumber" />
         <el-table-column
@@ -66,7 +76,7 @@
       <!-- 分页组件 -->
       <el-row type="flex" justify="end" align="middle" style="height: 60px">
         <el-pagination
-          layout="prev, pager, next, sizes, total"
+          layout="total,  prev, pager, next, jumper"
           :current-page.sync="page.page"
           :page-size.sync="page.size"
           :page-sizes="[2, 5, 10]"
@@ -78,6 +88,17 @@
     </el-card>
     <!-- 弹窗 -->
     <AddEmployee :dialog-visible.sync="dialogVisible" />
+    <!-- 照片图片预览弹窗 -->
+    <el-dialog
+      title="提示"
+      :visible.sync="dialogVisiblePic"
+      width="30%"
+      :before-close="handleClose"
+    >
+      <!-- 懒渲染：内容默认没有创建，弹层显示的时候才创建 -->
+      <img :src="pictrue" alt="" style="width: 100%; height: 100%">
+      <canvas ref="canvas" />
+    </el-dialog>
   </div>
 </template>
 
@@ -85,6 +106,7 @@
 import AddEmployee from './component/add-employee.vue'
 import { getEmployeeList, delEmployee } from '@/api/employess'
 import EnumHireType from '@/api/constant/employees'
+import QRCode from 'qrcode'
 export default {
   name: 'HrsaasIndex',
   components: {
@@ -100,7 +122,8 @@ export default {
       total: 0,
       loading: false,
       hireType: EnumHireType.hireType,
-      dialogVisible: false
+      dialogVisible: false,
+      dialogVisiblePic: false
     }
   },
   mounted() {
@@ -185,6 +208,24 @@ export default {
     // 点击查看，跳转路由
     view(row) {
       this.$router.push('/employees/detail/' + row.id)
+    },
+    // 2.vue:数据驱动/组件系统
+    // 数据驱动视图：数据变化=>视图变化
+    // 数据变化同步=>vue背后将视图更新（异步的，等所有的数据更新完成，视图在变化
+    // 为什么？如果是同步数据变视图立即变太消耗性能
+    // 等所有的数据变化了
+    showPic(row) {
+      if (!row.staffPhoto) {
+        return this.$message.error('头像为空')
+      }
+      this.dialogVisiblePic = true
+      // 方法/等视图更新后触发，获取到最新的视图
+      this.$nextTick(() => {
+        QRCode.toCanvas(this.$refs.canvas, row.staffPhoto, function(error) {
+          if (error) console.error(error)
+          console.log('success!')
+        })
+      })
     }
   }
 }
